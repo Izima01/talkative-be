@@ -17,10 +17,7 @@ const port = process.env.PORT || 8080;
 const url = process.env.mongoDBURL;
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents, SocketData >(httpServer, {
-  pingTimeout: 60000,
-  cors: {
-    origin: "http://localhost:5000"
-  }
+  pingTimeout: 60000
 });
 
 io.use((socket, next: NextFunction) => {
@@ -73,7 +70,7 @@ mongoose.connect(url)
 // .then(() => console.log("Connected to db successfully"))
 .catch((error: Error) =>console.log("Error connecting to db", error));
 
-app.use(cors({ origin: 'http://localhost:5000' }));
+app.use(cors({ origin: '*' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
