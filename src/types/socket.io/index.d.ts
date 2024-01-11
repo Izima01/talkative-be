@@ -18,7 +18,8 @@ export interface ClientToServerEvents {
     error: (dat: string) => void;
     joinChat: (chatId: string) => void;
     newMessage: (message: Record<string, any>) => void;
-    typing: () => void;
+    typing: (room: string) => void;
+    stopTyping: (room: string) => void;
 }
 
 interface InterServerEvents {
