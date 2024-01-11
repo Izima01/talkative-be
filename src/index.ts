@@ -62,8 +62,6 @@ io.on("connection", (socket) => {
   socket.on("typing", () => {
     
   })
-
-
 })
 
 mongoose.connect(url)
@@ -75,8 +73,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Error Handling middlewares
-// app.use(notFound);
-// app.use(errorHandler);
+app.use(notFound);
+app.use(errorHandler);
 
 app.use('/v1/users', userRoutes);
 app.use('/v1/chats', chatRoutes);
