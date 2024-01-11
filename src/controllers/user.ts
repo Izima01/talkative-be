@@ -33,7 +33,7 @@ export const searchUsers = async (req: Request, res: Response) => {
 
     const users = await UserModel.find(keyword).find({ _id: { $ne: req.user.userId } });
 
-    res.status(200).json(users);
+    res.status(200).json({ success: true, users });
 }
 
 export const register = async (req: Request, res: Response) => {
