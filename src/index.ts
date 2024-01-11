@@ -59,8 +59,8 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("basicemit", "newMessage", message);
   });
 
-  socket.on("typing", (room) => socket.in(room).emit("basicemit", "typing));
-  socket.on("stopTyping", (room) => socket.in(room).emit("basicemit", "stop typing));
+  socket.on("typing", (room) => socket.in(room).emit("basicemit", "typing"));
+  socket.on("stopTyping", (room) => socket.in(room).emit("basicemit", "stop typing"));
 
   socket.off("setup", async(userData) => {
     console.log("user disconnected");
