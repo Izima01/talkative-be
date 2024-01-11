@@ -34,7 +34,7 @@ io.use((socket, next: NextFunction) => {
 io.on("connection", (socket) => {
   console.log("connected to socket");
 
-  socket.on("setup", async(userData:  SocketData) => {
+  socket.on("setup", async(userData) => {
     socket.join(userData.userId);
     socket.emit("basicemit", "connection");
 
@@ -59,9 +59,15 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("basicemit", "newMessage", message);
   });
 
-  socket.on("typing", () => {
+  socket.on("typing", (room) => socket.in(room).emit("basicemit", "typing));
+  socket.on("stopTyping", (room) => socket.in(room).emit("basicemit", "stop typing));
+
+  socket.off("setup", async(userData) => {
+    console.log("user disconnected");
+    socket.leave(userData.userId);
     
-  })
+    await UserModel.findByIdAndUpdate(userData.userId, { isOnline: false }, { new: true });
+  })                                                       
 })
 
 mongoose.connect(url)
