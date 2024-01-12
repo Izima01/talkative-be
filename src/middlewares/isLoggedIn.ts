@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { getUserById, getUserBySessionToken } from '../models/users';
+import { getUserById } from '../models/users';
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 
