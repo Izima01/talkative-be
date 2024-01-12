@@ -33,24 +33,18 @@ export const searchUsers = async (req: Request, res: Response) => {
 
     const users = await UserModel.find(keyword).find({ _id: { $ne: req.user.userId } });
 
-    res.status(200).json({ success: true, users });
+    res.status(200).json(users);
 }
 
 export const register = async (req: Request, res: Response) => {
     try {
         const { password, username, picture } = req.body;
-        
-        if (!username) {
-            return res.status(400).send({ error: 'Username not given', success: false });
-        } else if (!password) {
-            return res.status(400).send({ error: 'Password not given', success: false });
-        }
+
+        if (!username) return res.status(400).send({ error: 'Username not given', success: false });
+        else if (!password) return res.status(400).send({ error: 'Password not given', success: false });
 
         const userExists = await getUserByUsername(username);
-        
-        if (userExists) {
-            return res.status(400).send({ error: 'Username already taken', success: false });
-        }
+        if (userExists) return res.status(400).send({ error: 'Username already taken', success: false });
 
         const hashPassword = encryptPassword(password);
         const user = await createUser({
@@ -59,8 +53,14 @@ export const register = async (req: Request, res: Response) => {
             picture : picture
         });
 
-        res.status(201).json({ success: true, user });
+        const newUser = await UserModel.findById(user._id).select("-password");
+        const token = jwt.sign({
+            username: newUser.username,
+            userId: newUser._id,
+            picture: newUser.picture
+        }, secret);
 
+        res.status(201).json({ success: true, user: newUser, token });
     } catch(error) {
         res.status(400).send({ error, success: false });
         throw new Error("Failed to Create the User");
@@ -96,7 +96,6 @@ export const login = async (req: Request, res: Response) => {
             picture: user.picture
         }, secret);
 
-        res.cookie('WA-CLONE-AUTH', token, { domain: 'localhost' });
         res.status(200).json({ success: true, token });
     } catch(error) {
         console.log(error);
