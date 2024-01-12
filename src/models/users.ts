@@ -13,6 +13,8 @@ export const getUsers = () => UserModel.find();
 
 export const getUserByUsername = (username: string) => UserModel.findOne({ username });
 
+export const createUser = (values: Record<string, any>) => UserModel.create(values);
+
 export const getUserById = (id: string) => UserModel.findById(id);
 
 export const updateUserById = (id: string, values: Record<string, any>) => UserModel.findByIdAndUpdate(id, values, { new: true });
