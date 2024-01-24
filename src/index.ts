@@ -20,6 +20,23 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, SocketData >(h
   pingTimeout: 60000
 });
 
+mongoose.connect(url)
+// .then(() => console.log("Connected to db successfully"))
+.catch((error: Error) =>console.log("Error connecting to db", error));
+
+app.use(cors({ origin: '*' }));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+
+app.use('/v1/users', userRoutes);
+app.use('/v1/chats', chatRoutes);
+app.use('/v1/messages', messageRoutes);
+
+// Error Handling middlewares
+app.use(notFound);
+app.use(errorHandler);
+
 io.use((socket, next: NextFunction) => {
   const token = socket.request.headers.authorization;
 
@@ -68,24 +85,7 @@ io.on("connection", (socket) => {
     
     await UserModel.findByIdAndUpdate(userData.userId, { isOnline: false }, { new: true });
   })                                                       
-})
-
-mongoose.connect(url)
-// .then(() => console.log("Connected to db successfully"))
-.catch((error: Error) =>console.log("Error connecting to db", error));
-
-app.use(cors({ origin: '*' }));
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-// Error Handling middlewares
-app.use(notFound);
-app.use(errorHandler);
-
-app.use('/v1/users', userRoutes);
-app.use('/v1/chats', chatRoutes);
-app.use('/v1/messages', messageRoutes);
-
+});
 
 httpServer.listen(port, () => {
   console.log("Connected to", `http://localhost:${port}`);
