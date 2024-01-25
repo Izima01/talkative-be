@@ -8,7 +8,7 @@ export const fetchMessagesForAChat = async (req: Request, res: Response) => {
         const chatId = req.query.chatId;
         const chat = await chatModel.findById(chatId);
 
-        let messages = await messageModel.find({ chat: chatId }).populate("sender").sort({ updatedAt: -1 });
+        let messages = await messageModel.find({ chat: chatId }).populate("sender");
 
         let allChats = await UserModel.populate(chat, {
             path: 'chat.users',
