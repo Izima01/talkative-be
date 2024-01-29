@@ -24,7 +24,7 @@ mongoose.connect(url)
 // .then(() => console.log("Connected to db successfully"))
 .catch((error: Error) =>console.log("Error connecting to db", error));
 
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: ['http://localhost:3000/chats', 'https://talkative-chat.vercel.app'] }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
