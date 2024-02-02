@@ -50,7 +50,7 @@ io.use((socket, next: NextFunction) => {
 
   const { error, user } = ioAuthFunction(token);
 
-  if (error) return socket.emit("basicemit", error);
+  if (error) return socket.emit("error", error);
 
   socket.data = user;
   next();
@@ -64,7 +64,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("joinChat", (chatId) => {
-    console.log(`${socket.data.username} joined ${chatId} group chat`);
     socket.join(chatId);
   });
 
@@ -73,16 +72,15 @@ io.on("connection", (socket) => {
   });
 
   socket.on("newMessage", (message) => {
-    console.log(message);
     const chat = message.chat;
-
+    
     if (!chat.users) return console.log("No users in group chat");
     
-    socket.broadcast.emit("messageRecieved", message);
+    socket.to(chat._id).emit("messageRecieved", message);
   });
 
-  socket.on("typing", (room) => socket.in(room).emit("basicemit", "typing"));
-  socket.on("stopTyping", (room) => socket.in(room).emit("basicemit", "stop typing"));
+  socket.on("typing", (room, username) => socket.to(room).emit("typing", username));
+  socket.on("stopTyping", (room) => socket.to(room).emit("stopTyping"));
 
   socket.on("disconnect", async () => {
     socket.leave(socket.data.userId);

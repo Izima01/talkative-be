@@ -6,12 +6,12 @@ export interface SocketData {
 }
 
 export interface ServerToClientEvents {
-    noArg: () => void;
-    basicemit: (a: string, b?: Record<string, any>) => void;
     connection: () => void;
     newMessage: (message: Record<string, any>) => void;
-    withAck: (d: string, callback: (e:number) => void) => void;
     messageRecieved: (message: Record<string, any>) => void;
+    typing: (username: string) => void;
+    stopTyping: () => void;
+    error: (msg: string) => void;
 }
 
 export interface ClientToServerEvents {
@@ -20,7 +20,7 @@ export interface ClientToServerEvents {
     error: (dat: string) => void;
     joinChat: (chatId: string) => void;
     newMessage: (message: Record<string, any>) => void;
-    typing: (room: string) => void;
+    typing: (room: string, username: string) => void;
     stopTyping: (room: string) => void;
     disconnect: (user: SocketData) => void;
 }
