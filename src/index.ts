@@ -17,8 +17,8 @@ const port = process.env.PORT || 8080;
 const url = process.env.mongoDBURL;
 
 app.use(cors({
-  origin: [/^http:\/\/localhost:3000/, /^http:\/\/talkative-chat.vercel.app/ ],
-  allowedHeaders: ["Authorization"],
+  origin: [/^http:\/\/localhost:3000/, /^http:\/\/talkative-chat.vercel.app/],
+  allowedHeaders: ["Authorization", "Content-type"],
   methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
   credentials: true
 }));
@@ -28,7 +28,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, SocketData >(h
   cors: {
     origin: [/^http:\/\/localhost:3000/, /^http:\/\/talkative-chat.vercel.app/ ],
     // origin: ["http://localhost:3000/", "https://talkative-chat.vercel.app"],
-    allowedHeaders: ["Authorization"],
+    allowedHeaders: ["Authorization", "Content-type"],
     methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
     credentials: true
   }
