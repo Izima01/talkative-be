@@ -15,27 +15,35 @@ import { UserModel } from './models/users';
 const app = express();
 const port = process.env.PORT || 8080;
 const url = process.env.mongoDBURL;
+
+app.use(cors({
+  origin: [/^http:\/\/localhost:3000/, /^http:\/\/talkative-chat.vercel.app/ ],
+  allowedHeaders: ["Authorization"],
+  methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  credentials: true
+}));
+
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents, SocketData >(httpServer, {
-  pingTimeout: 60000
+  cors: {
+    origin: [/^http:\/\/localhost:3000/, /^http:\/\/talkative-chat.vercel.app/ ],
+    // origin: ["http://localhost:3000/", "https://talkative-chat.vercel.app"],
+    allowedHeaders: ["Authorization"],
+    methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    credentials: true
+  }
 });
 
 mongoose.connect(url)
 // .then(() => console.log("Connected to db successfully"))
-.catch((error: Error) =>console.log("Error connecting to db", error));
+.catch((error: Error) =>console.error("Error connecting to db", error));
 
-app.use(cors({ origin: ['http://localhost:3000/chats', 'https://talkative-chat.vercel.app'] }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-
 
 app.use('/v1/users', userRoutes);
 app.use('/v1/chats', chatRoutes);
 app.use('/v1/messages', messageRoutes);
-
-// Error Handling middlewares
-app.use(notFound);
-app.use(errorHandler);
 
 io.use((socket, next: NextFunction) => {
   const token = socket.request.headers.authorization;
@@ -49,19 +57,15 @@ io.use((socket, next: NextFunction) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("connected to socket");
-
   socket.on("setup", async(userData) => {
     socket.join(userData.userId);
-    socket.emit("basicemit", "connection");
-
-    await UserModel.findByIdAndUpdate(userData.userId, { isOnline: true }, { new: true });
+    socket.emit("connection");
+    await UserModel.findByIdAndUpdate(userData.userId, { isOnline: true });
   });
 
   socket.on("joinChat", (chatId) => {
+    console.log(`${socket.data.username} joined ${chatId} group chat`);
     socket.join(chatId);
-
-    console.log(`${socket.data.username} joined this group chat`);
   });
 
   socket.on("error", (error) => {
@@ -69,23 +73,27 @@ io.on("connection", (socket) => {
   });
 
   socket.on("newMessage", (message) => {
+    console.log(message);
     const chat = message.chat;
 
     if (!chat.users) return console.log("No users in group chat");
     
-    socket.broadcast.emit("basicemit", "newMessage", message);
+    socket.broadcast.emit("messageRecieved", message);
   });
 
   socket.on("typing", (room) => socket.in(room).emit("basicemit", "typing"));
   socket.on("stopTyping", (room) => socket.in(room).emit("basicemit", "stop typing"));
 
-  socket.off("setup", async(userData) => {
-    console.log("user disconnected");
-    socket.leave(userData.userId);
-    
-    await UserModel.findByIdAndUpdate(userData.userId, { isOnline: false }, { new: true });
-  })                                                       
+  socket.on("disconnect", async () => {
+    socket.leave(socket.data.userId);
+
+    await UserModel.findByIdAndUpdate(socket.data.userId, { isOnline: false }, { new: true });
+  });
 });
+
+// Error Handling middlewares
+app.use(notFound);
+app.use(errorHandler);
 
 httpServer.listen(port, () => {
   console.log("Connected to", `http://localhost:${port}`);

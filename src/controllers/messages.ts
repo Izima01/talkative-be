@@ -30,11 +30,10 @@ export const sendMessage = async (req: Request, res: Response) => {
 
         const newMessage = await messageModel.create({ chat: chatId, content, sender: req.user.userId.toString() });
 
-        let message = await messageModel.findById(newMessage._id).populate("sender", "-password");
-
-        res.status(201).json({ success: true, message: message });
+        let message = await messageModel.findById(newMessage._id).populate("sender", "-password").populate("chat");
 
         await chatModel.findByIdAndUpdate(chatId, { latestMessage: message._id });
+        res.status(201).json({ success: true, message });
     } catch(error) {
         console.log(error);
         res.status(400).json({ success: false, error });
