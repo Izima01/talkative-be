@@ -76,7 +76,16 @@ io.on("connection", (socket) => {
     
     if (!chat.users) return console.log("No users in group chat");
     
-    socket.to(chat._id).emit("messageRecieved", message);
+    chat.users.map((u: string) => socket.to(u).emit("messageRecieved", message));
+  });
+
+  socket.on("newGroup", (group) => {
+    console.log("new group chat");
+    console.log((group));
+    
+    group.users.map((u: Record<string, any>) => {
+      socket.to(u._id).emit("addedToGroup", group);
+    });
   });
 
   socket.on("typing", (room, username) => socket.to(room).emit("typing", username));
