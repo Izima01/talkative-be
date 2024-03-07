@@ -102,3 +102,43 @@ export const login = async (req: Request, res: Response) => {
         return res.status(400).send({ error: error.error, success: false });
     }
 }
+
+export const testLogin = async (req: Request, res: Response) => {
+    try {
+        const { username } = req.body;
+
+        if (!username) {
+            return res.status(400).send({ error: 'Username not given', success: false });
+        }
+
+        const user = await getUserByUsername(username).select('+password');
+
+        if (!user) {
+            const hashPassword = encryptPassword(username+'1234');
+            const user = await createUser({
+                username,
+                password: hashPassword
+            });
+
+            const token = jwt.sign({
+                username: user.username,
+                userId: user._id,
+                picture: user.picture
+            }, secret);
+    
+            return res.status(200).json({ success: true, token });
+        }
+        
+        const token = jwt.sign({
+            username: user.username,
+            userId: user._id,
+            picture: user.picture
+        }, secret);
+
+        return res.status(200).json({ success: true, token });
+    } catch(error) {
+        console.log(error);
+        return res.status(400).send({ error: error.error, success: false });
+    }
+}
+
