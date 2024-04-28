@@ -90,11 +90,13 @@ io.on("connection", (socket) => {
 
     const createdChat = await chatModel.create(chatData);
 
-    await messageModel.create({
+    const firstMessage = await messageModel.create({
       chat: createdChat._id,
       content: `Hi ${socket.data.username}. Welcome to my Chat app. Send a message to me or search for new users or create a group chat`,
       sender: "65bd4c3c246007ad53daa6ae"
     });
+
+    await chatModel.findByIdAndUpdate(createdChat._id, { latestMessage: firstMessage._id });
   });
 
   socket.on("newGroup", (group) => {

@@ -1,3 +1,5 @@
+import { messageModel } from './../models/message';
+import { chatModel } from './../models/chats';
 import { Request, Response } from "express";
 import { getUserByUsername, updateUserById, createUser, UserModel } from "../models/users";
 const jwt = require('jsonwebtoken');
@@ -124,6 +126,23 @@ export const testLogin = async (req: Request, res: Response) => {
                 userId: user._id,
                 picture: user.picture
             }, secret);
+
+            // send a new chat to the user
+            const chatData = {
+                chatName: "personal",
+                isGroupChat: false,
+                users: [ "65bd4c3c246007ad53daa6ae", user._id ]
+              };
+          
+              const createdChat = await chatModel.create(chatData);
+          
+              const firstMessage = await messageModel.create({
+                chat: createdChat._id,
+                content: `Hi ${username}. Welcome to my Chat app. Send a message to me or search for new users or create a group chat`,
+                sender: "65bd4c3c246007ad53daa6ae"
+              });
+          
+              await chatModel.findByIdAndUpdate(createdChat._id, { latestMessage: firstMessage._id });
     
             return res.status(200).json({ success: true, token });
         }

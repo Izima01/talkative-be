@@ -39,3 +39,18 @@ export const sendMessage = async (req: Request, res: Response) => {
         res.status(400).json({ success: false, error });
     }
 }
+
+export const delMessageFromUser = async (req: Request, res: Response) => {
+    const userId = req.body.user;
+
+    const allMessages = await messageModel.find({
+        sender: userId
+    });
+    console.log(allMessages.length);
+    
+    // while (allMessages.length > 30) {
+        messageModel.findOneAndDelete({ sender: userId.toString() });
+    // }
+
+    // res.sendStatus(allMessages.length);
+}
