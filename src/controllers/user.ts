@@ -12,11 +12,8 @@ export const editProfile = async (req: Request, res: Response) => {
         const { username: newUsername, picture } = req.body;
 
         if (newUsername === oldUsername) return res.status(400).json({ success: false, error: "Same as previous username" });
-
-        const doesUsernameExist = await UserModel.find({ username: newUsername });
-
+        const doesUsernameExist = await UserModel.find({ username: newUsername })
         if (doesUsernameExist.length > 0) return res.status(400).json({ success: false, error: "Username taken" });
-
         const newDetails = await updateUserById(id, { username: newUsername, picture });
 
         res.status(200).json({ updatedUser: await UserModel.findById(newDetails._id) });
@@ -59,6 +56,8 @@ export const register = async (req: Request, res: Response) => {
             userId: newUser._id,
             picture: newUser.picture
         }, secret);
+
+        
 
         res.status(201).json({ success: true, user: newUser, token });
     } catch(error) {

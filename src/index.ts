@@ -11,6 +11,8 @@ import { ClientToServerEvents, ServerToClientEvents, SocketData } from 'types/so
 import { createServer } from 'http';
 import { ioAuthFunction } from './middlewares/ioAuth';
 import { UserModel } from './models/users';
+import { chatModel } from 'models/chats';
+import { messageModel } from 'models/message';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -77,6 +79,22 @@ io.on("connection", (socket) => {
     if (!chat.users) return console.log("No users in group chat");
     
     chat.users.map((u: string) => socket.to(u).emit("messageRecieved", message));
+  });
+
+  socket.on("newUser", async() => {
+    const chatData = {
+      chatName: "personal",
+      isGroupChat: false,
+      users: [ "65bd4c3c246007ad53daa6ae", socket.data.userId ]
+    };
+
+    const createdChat = await chatModel.create(chatData);
+
+    await messageModel.create({
+      chat: createdChat._id,
+      content: `Hi ${socket.data.username}. Welcome to my Chat app. Send a message to me or search for new users or create a group chat`,
+      sender: "65bd4c3c246007ad53daa6ae"
+    });
   });
 
   socket.on("newGroup", (group) => {
