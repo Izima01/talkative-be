@@ -11,8 +11,8 @@ import { ClientToServerEvents, ServerToClientEvents, SocketData } from 'types/so
 import { createServer } from 'http';
 import { ioAuthFunction } from './middlewares/ioAuth';
 import { UserModel } from './models/users';
-import { chatModel } from 'models/chats';
-import { messageModel } from 'models/message';
+import { chatModel } from './models/chats';
+import { messageModel } from './models/message';
 
 const app = express();
 const port = process.env.PORT || 8080;
